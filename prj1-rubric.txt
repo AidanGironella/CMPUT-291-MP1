@@ -1,0 +1,84 @@
+CMPUT 291 - Fall 2022
+A marking rubric for Mini-project 1 
+
+[84 marks total] Demo session
+[? marks] a) Login screen
+  Sign in with a valid id and password as a user or artist.
+  Sign up as a new user - the information is obtained and recorded in users table.
+  Attempt to sign in with an invalid id or password.
+ 
+[? marks] b) After a log in, users should be able to perform the following tasks (as per spec)
+  Start a session
+    The information is recorded in sessions table.
+    A unique session id is assigned, the session start date/time is set to the current date/time, and the session end date is set to null.
+    The uid is set to the current user. 
+
+  Search for songs and playlists
+    The user enters one or more keywords and the system retrieves all matching songs and playlists (as per spec).
+    For each matching song/playlist, the information listed in the spec are displayed.
+    The results are ordered based on the number of matching keywords.
+    If there are more than 5 matching songs/playlist, at most 5 matches are displayed with options to see more.
+    A playlist can be selected to see more information about it (as per spec).
+    A song can be selected after which any of the song actions can be performed (as per spec and discussed next).
+
+  Search for artists
+    The user enters one or more keywords and the system retrieves all matching artists (as per spec).
+    For each matching artist, the information listed in the spec are displayed.
+    The results are ordered based on the number of matching keywords.
+    If there are more than 5 matching artists, at most 5 matches are displayed with options to see more.
+    An artist can be selected to see more information about it (as per spec).
+    With the songs of an artist listed, a song can be selected after which any of the song actions can be performed (as per spec and discussed next).
+
+  End the session
+    The user should be able to end the session. This should be recorded with the end date/time set to the current date/time.
+
+  Song actions
+    When a song is selected, the user can perform any of these actions: (1) listen to it, (2) see more information about it, or (3) add it to a playlist.
+    For (2), a listening event is recorded within the current session of the user. If a session is not started, a new session will be started (as described in the spec) and the listening event is recorded for this session.
+    For (3), a song can be added to an existing playlist of the user or a new playlist (as per spec).
+
+[? marks] c) Artists can perform the following action after a login:
+  Artist adds a song
+    Artists can add a song by providing the information (as per spec).
+    The information is recorded in songs and performs tables.
+    A unique id is assigned to the song (if it is a new title).
+
+ Artist finds top fans and playlists
+    Artists can list top 3 fans and playlists (as per spec). 
+
+[? marks] d) Logout
+  The user can log out, after which the program remains in login screen 
+  The user can exit the program if s/he wish
+
+[? marks] e) Except the password which is case-sensitive, all other string matches are case-insensitive.
+
+[? marks] f) for groups of 3
+  SQL injection attacks are countered and the password is non-visible
+
+[12 marks total] Report includes
+  (a) A general overview of the system with a small user guide
+  (b) A detailed design of the software 
+  (c) Testing strategy 
+  (d) Group work strategy (see the next bullet) 
+
+[4 marks total] Group work strategy
+  The project break-down between partners is well-explained
+  The person responsible for each task is stated
+  The time spent and the progress made for each partner is stated
+  The method of coordination is discussed
+
+Testing process
+  1. The demo will be run using the source code submitted and nothing else. It is essential to include every file that is needed to compile and run your code.
+  
+  2. You will be joining our TAs in your demo session.
+
+  3. We must be able to compile and run your code under our account on lab machines and using our own database. You are not allowed to make any changes to the code without a hefty penalty. The penalty is 10% deduction for editing 1-10 characters and 20% deduction for editing 11-20 characters. An edit can be adding a character, removing a character or replacing a character in your application code. The changes are accumulative, meaning if you add 10 characters to one file and remove 6 characters from another file, your changes will be counted as 16, and you will lose 20 marks assuming the project is marked out of 100.
+
+  4. Changing more than 20 characters is not allowed, and if that is the only way to run your application, you will get zero on the demo part.
+ 
+  5. Our test data and our test cases will be published after the project due date but before our demo times. You will have a chance to self-asses your application and learn about possible issues (if any) before your demo time.
+
+  6. Before we start your demo, you have the options to (a) run your code as is following our marking scheme, (b) change your code under the penalty scheme discussed above, or (c) withdraw from demo.
+    (a) Your preferred choice should be running your uploaded code as is. Under this option, your demo mark will be all based on how your program performs on our test cases.
+    (b) If you decide to change your code, you will be given up to 5min to change anything you wish in your application according to the penalty scheme discussed above. Since your code is under a TA account, you will instruct the TA to make those changes. After we start running your application, no change can be made, and your project will be assessed strictly following our marking scheme. For the same reason, it is important to run your application with our test cases in advance and know if your application fails and where it fails.
+    (c) You may withdraw from demoing your work for any reason (e.g., you need to make more than 20 character changes to make it work). In such cases, we will assess your project visually and will assign a mark ranging between 0 to 15% for the effort. If you decide to take this option, you have to let us know explicitly either before demo time or at the demo time before attempting to run your application. Otherwise, we will not be evaluating any submission that is not demoed. Also this option is not applicable after we start demoing your application.

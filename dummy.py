@@ -22,7 +22,7 @@ def start_session(id):
     # Finding a unique Sno
     i = 1
     while True:
-        if (i not in store):
+        if i not in store:
             sno = i
             break
         i = i + 1
@@ -41,7 +41,7 @@ def search_songs_playlists():
     # Implement Search for songs and playlists
     clearTerminal()
     while True:
-        keyword = input("Please enter one or more keywords to search for, each separated by a single space: ")
+        keyword = input("Please enter one or more keywords to search for, each separated by a single space: ").strip()
         keywords = keyword.split(' ')
         uniqueKeywords = []
         i = 1
@@ -114,11 +114,11 @@ def user_session(id):
     while True:
         print(menu)
 
-        user_option = input(str("Please enter an option #: "))
+        user_option = input(str("Please enter an option #: ")).strip()
         while (user_option not in ["1", "2", "3", "4"]):
             clearTerminal()
             print(menu)
-            user_option = input(str("Invalid option entered. Please enter an option #: "))
+            user_option = input(str("Invalid option entered. Please enter an option #: ")).strip()
 
         if user_option == "1":
             returned_sno = start_session(id)
@@ -154,7 +154,7 @@ def main():
         artistfound = False
 
         clearTerminal()  # Clear the system terminal to look cleaner
-        id = input("Login Screen: Please enter your ID:  ")
+        id = input("Login Screen: Please enter your ID:  ").strip()
         cur.execute("select name from users where uid=?", (id,))
         data = cur.fetchall()
 
@@ -184,7 +184,7 @@ def main():
 
             while (user_option != "1" and user_option != "2"):
                 print("\r", end="")
-                user_option = input("Invalid option. Please enter either 1 for user or 2 for artist: ")
+                user_option = input("Invalid option. Please enter either 1 for user or 2 for artist: ").strip()
 
             userpass = getpass(
                 prompt=("Please enter your password (as a" + (" user): " if user_option == "1" else "n artist): ")))
@@ -241,16 +241,16 @@ def main():
                 # Invalid Id. Ask for Sign-up
         else:
             print("No valid user or artist ID found. Would you like to sign-up as a new user?")
-            user_option = input(str("Press 1 to continue!! "))
+            user_option = input(str("Press 1 to continue!! ")).strip()
 
             if user_option == "1":
-                id = input("Please provide a user-id: ")
+                id = input("Please provide a user-id: ").strip()
                 cur.execute("select uid from users where uid=?", (id,))
                 data = cur.fetchall()
 
                 if not data:
-                    name = input("Please provide a name: ")
-                    password = input("Please provide a Password: ")
+                    name = input("Please provide a name: ").strip()
+                    password = input("Please provide a Password: ").strip()
 
                     query_vals = (id, name, password)
                     cur.execute("INSERT INTO users (uid, name, pwd) VALUES (?,?,?)", query_vals)
@@ -263,5 +263,4 @@ def main():
                     print("This user-id already exists.")
 
 
-# main()
-search_artists()
+main()

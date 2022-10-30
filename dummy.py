@@ -91,7 +91,7 @@ def search_artists():
                 artist_data = cur.fetchall()
 
                 if len(artist_data) == 0:
-                    print('Invalid choice ')
+                    print('Invalid choice! Try again later ')
                     break
 
                 print(str('Songs of ' + UserInput.title() + ' (id, title, duration)').center(150, '-'))

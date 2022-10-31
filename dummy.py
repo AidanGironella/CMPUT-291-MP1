@@ -78,6 +78,7 @@ def search_artists():
                 UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
                 search_song(UserInput)
 
+
             if i % 5 == 0:
                 print()
                 UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()

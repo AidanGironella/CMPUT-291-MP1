@@ -64,46 +64,51 @@ def search_artists():
     if len(data) == 0:
         print('\nSorry! There is no artist with this name')
 
-    i = 0
-    print()
-    print(str('Found ' + str(len(data)) + ' matching results (Name, Nationality, Number of Songs)').center(150, '-'))
+    else:
+        i = 0
+        print()
+        print(str('Found ' + str(len(data)) + ' matching results (Name, Nationality, Number of Songs)').center(150, '-'))
 
-    for j in data:
-        print(j)
-        i +=1
-        if i == len(data):
-            print('This is end of our search result.'.center(150, '-'))
-
-        if i % 5 == 0:
-            print()
-            UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
-            print()
-            if UserInput.lower() == 'y':
-                continue
-
-            elif UserInput.lower() == 'n':
-                print()
+        for j in data:
+            print(j)
+            i +=1
+            if i == len(data):
+                print(i, 'hi')
                 print('This is end of our search result.'.center(150, '-'))
-                break
+                UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
+                search_song(UserInput)
 
-            else:
-                cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name in {};".format((UserInput.title(), UserInput.lower(), UserInput.upper(), UserInput.capitalize())))
-                artist_data = cur.fetchall()
+            if i % 5 == 0:
+                print()
+                UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
+                print()
+                if UserInput.lower() == 'y':
+                    continue
 
-                if len(artist_data) == 0:
-                    print('Invalid choice! Try again later ')
+                elif UserInput.lower() == 'n':
+                    print()
+                    print('This is end of our search result.'.center(150, '-'))
                     break
 
-                print(str('Songs of ' + UserInput.title() + ' (id, title, duration)').center(150, '-'))
-                for i in artist_data:
-                    print(i)
+                else:
+                    search_song(UserInput)
+                    break
 
-                print()
-                SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
-                # Use this SongSelection variable to perform a song action
-                break
+def search_song(UserInput):
+    # created for search_artist function to avoid writing duplicate code. This function is not required by assignment schema
 
+    cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name in {};".format((UserInput.title(), UserInput.lower(), UserInput.upper(), UserInput.capitalize())))
+    artist_data = cur.fetchall()
 
+    if len(artist_data) == 0:
+        print('Invalid choice! Try again later ')
+
+    print(str('Songs of ' + UserInput.title() + ' (id, title, duration)').center(150, '-'))
+    for i in artist_data:
+        print(i)
+
+    print()
+    SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
 
 
 

@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import time
 from getpass import getpass
+import sys
 
 conn = sqlite3.connect('./temp.db')
 cur = conn.cursor()
@@ -203,16 +204,17 @@ def search_song(UserInput):
 
 
 def user_session(id):
+
     # User Session
-    menu = "User Session\n1. Start a session\n2. Search for songs and playlists\n3. Search for artists\n4. End the session"
+    menu = "User Session\n1. Start a session\n2. Search for songs and playlists\n3. Search for artists\n4. End the session\n5. Log out\n6. Exit the System"
     while True:
         print(menu)
 
-        user_option = input(str("Please enter an option #: ")).strip()
-        while (user_option not in ["1", "2", "3", "4"]):
+        user_option = input(str("Please enter an option #: "))
+        while(user_option not in ["1", "2", "3", "4","5","6"]):
             clearTerminal()
             print(menu)
-            user_option = input(str("Invalid option entered. Please enter an option #: ")).strip()
+            user_option = input(str("Invalid option entered. Please enter an option #: "))
 
         if user_option == "1":
             returned_sno = start_session(id)
@@ -228,15 +230,84 @@ def user_session(id):
             current_date = now.date()
             cur.execute("UPDATE sessions set end = ? where uid = ? and sno = ?", (current_date, id, returned_sno))
             conn.commit()
+        elif user_option == "5":
+            now = datetime.now()
+            current_date = now.date()
+            cur.execute("UPDATE sessions set end = ? where uid = ? and end IS NULL", (current_date, id))
+            conn.commit()
             break
-
+        elif user_option == "6":
+            now = datetime.now()
+            current_date = now.date()
+            cur.execute("UPDATE sessions set end = ? where uid = ? and end IS NULL", (current_date, id))
+            conn.commit()    
+            clearTerminal()        
+            sys.exit()
         else:
             print("Please enter a valid Option #")
 
 
-def artist_session():
-    print("Artist Session")
 
+def add_song(id, title, duration):
+    artits_id = input("Please provide the ids of any additional artist who have performed this song separated by space: ")
+    cur.execute("select * from songs")
+    data = cur.fetchall()
+    store = []
+    i = 1
+
+    for row in data:
+        store.append(row[0])
+
+    while True:
+        if i not in store:
+            sid = i
+            break
+        i = i + 1
+
+    artits_list = artits_id.split()
+    artits_list.append(id)
+    cur.execute("INSERT INTO songs (sid, title, duration) VALUES (?,?,?)", (sid, title, duration))
+    conn.commit()
+
+    for aid in artits_list:
+        # TODO Finish the checking whether the artist exist in DB 
+        cur.execute("select * from artists where lower(aid) = ?", (aid.lower(), ))
+        if not data:
+            print("Artit "+ aid + " does not exists in the Database")
+        else:
+            cur.execute("INSERT INTO perform (aid, sid) VALUES (?,?)", (aid, sid))
+            conn.commit()
+
+
+
+def artist_session(id):
+    # "Artist Session"
+    menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists"
+
+    while True:
+        print(menu)
+        user_option = input(str("Please enter an option #: "))
+
+        while(user_option not in ["1", "2"]):
+            clearTerminal()
+            print(menu)
+            user_option = input(str("Invalid option entered. Please enter an option #: "))
+
+        if user_option == "1":
+            title = (input("Please provide the title of the song: ")).lower()
+            duration = input("Please provide the duration of the song (in seconds): ")
+            cur.execute("select * from songs where lower(title) = ? and duration = ?", (title, duration))
+            data = cur.fetchall()
+
+            if not data:
+                # we can add a song
+                add_song(id, title, duration)
+            else:
+                print("Song exists")
+                time.sleep(1)
+                clearTerminal()
+
+            
 
 def clearTerminal():
     os.system('cls' if os.name == 'nt' else 'clear')  # Clear the system terminal to look cleaner
@@ -293,11 +364,11 @@ def main():
                     "uid" if user_option == "1" else "aid", "users" if user_option == "1" else "artists",
                     "uid" if user_option == "1" else "aid"), (id, userpass))
                 data = cur.fetchall()
-
+            
             print("Log-in Successful! Navigating to main screen...")
-            time.sleep(0)
+            time.sleep(1.2)
             clearTerminal()
-            user_session(id)
+            user_session(id) if user_option == "1" else artist_session(id)
 
 
         # If the id exists for only the user
@@ -330,12 +401,12 @@ def main():
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(0)
                 clearTerminal()
-                user_session(id)
+                artist_session(id)
 
                 # Invalid Id. Ask for Sign-up
         else:
             print("No valid user or artist ID found. Would you like to sign-up as a new user?")
-            user_option = input(str("Press 1 to continue!! ")).strip()
+            user_option = input(str("Press 1 to continue!! \nPress anything else to go back to Log-in Terminal ")).strip()
 
             if user_option == "1":
                 id = input("Please provide a user-id: ").strip()

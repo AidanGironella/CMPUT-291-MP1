@@ -87,7 +87,7 @@ def search_artists():
                 break
 
             else:
-                cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = ?;", (UserInput.title(),))
+                cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name in {};".format((UserInput.title(), UserInput.lower(), UserInput.upper(), UserInput.capitalize())))
                 artist_data = cur.fetchall()
 
                 if len(artist_data) == 0:
@@ -262,5 +262,5 @@ def main():
                 else:
                     print("This user-id already exists.")
 
-
-main()
+search_artists()
+# main()

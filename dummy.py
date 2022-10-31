@@ -38,22 +38,110 @@ def start_session(id):
 
 
 def search_songs_playlists():
-    # Implement Search for songs and playlists
     clearTerminal()
     while True:
-        keyword = input("Please enter one or more keywords to search for, each separated by a single space: ").strip()
+        keyword = input("Please enter one or more keywords to search for, each separated by a single space: ")
         keywords = keyword.split(' ')
         uniqueKeywords = []
-        i = 1
+        results = []
+        counts = {}
+        query = "WITH temp as (select pid from playlists where "  # Construct temp table to get matching playlist IDs
         for k in keywords:
             if (k.lower() not in uniqueKeywords):
                 uniqueKeywords.append(k.lower())
-                cur.execute("SELECT * from songs where title like '%{}%';".format(k))
-                data = cur.fetchall()
-                # print(data)
-                for row in data:
-                    print('{}.\tSong ID: {} | Title: {} | Duration: {} seconds'.format(i, row[0], row[1], row[2]))
-                    i += 1
+                query += "(title like '%{}%') or ".format(k)
+        query = query[:len(query) - 3] + ") select sid, title, duration, ("  # Get matching songs
+        for k in uniqueKeywords:  # get number of keyword matches
+            query += "case when title like '%{}%' then 1 else 0 end + ".format(k)
+        query = query[:len(query) - 3] + ") as rank, 'Song' from songs where "
+        for k in uniqueKeywords:  # construct the WHERE clause
+            query += "(title like '%{}%') or ".format(k)
+        query =  query[:len(query) - 3] + "union select p.pid, p.title, sum(s.duration) as duration, ("  # Playlists
+        for k in uniqueKeywords:  # get number of keyword matches
+            query += "case when p.title like '%{}%' then 1 else 0 end + ".format(k)
+        query = query[:len(query) - 3] + ") as rank, 'Playlist' from playlists p, plinclude pl, temp t, songs s "
+        query += "where p.pid = t.pid and p.pid = pl.pid and pl.sid = s.sid group by p.pid order by rank DESC "
+        
+        cur.execute(query)
+        data = cur.fetchall()
+        i = 1
+        for row in data:
+            results.append('{}.\t{} ID: {} | Title: {} | Duration: {} seconds'.format(i, row[4], row[0], row[1], row[2]))
+            i+=1
+
+        # menu = "Please enter one or more keywords to search for, each separated by a single space: "
+        # + keyword + "\nTotal number of results: {}".format(i-1)
+        print("Total number of results: {}".format(i-1))
+        j = 0
+        print(*results[j:j+5],sep="\n")
+        j += 5
+        userInput = input("\nPlease select a row number, or type 'more' to see more results: ").lower()
+        done = False
+        while done == False:
+            prompt = "\nUnrecognized input. Please select a row number, or type 'more' to see more results: "
+            try:  # User entered a number
+                userInput = int(userInput)-1
+                if (userInput in range(len(data))):
+                    done = True
+                    song_action(data[userInput][0], data[userInput][1], data[userInput][4])
+            except ValueError:  # User entered a string
+                if userInput == 'more':
+                    print(*results[j:j+5],sep="\n")
+                    j += 5
+                    prompt = "\nPlease select a row number, or type 'more' to see more results: "
+
+            if done == False: userInput = input(prompt).lower()
+
+
+# TODO -  If a playlist is selected, the id, the title and the duration of all songs in the playlist should be listed.
+def song_action(selectionID, selectionTitle, songOrPlaylist):
+    # Song Action
+    clearTerminal()
+    print("1. Listen to '{}'".format(selectionTitle) + "\n2. See more information\n3. Add {} to a playlist".format(selectionTitle))
+    userInput = input("Please select an action to perform for the song '{}': ".format(selectionTitle))
+    done = False
+    while done == False:
+        prompt = "Unrecognized input. Please select an action to perform for the song '{}': ".format(selectionTitle)
+        try:  # User entered a number
+            userInput = int(userInput)
+            if userInput in range(1,4):
+                done = True
+                if userInput == 1:  # Listen - TODO FINISH THIS
+                    print("now listening")
+                elif userInput == 2:  # See more information
+                    # Print all artists that performed the song
+                    cur.execute("SELECT a.name from perform p, artists a where p.sid = ? and p.aid = a.aid", (selectionID,))
+                    artists = cur.fetchall()
+                    result = "Artist(s): "
+                    for a in artists:
+                        result += a[0] + ", "
+                    print("\n" + result[:len(result) - 2])
+                    
+                    # Print id, title and duration of song
+                    cur.execute("SELECT * from songs where sid = ?;", (selectionID,))
+                    data = cur.fetchall()
+                    print('Song ID: {}\nTitle: {}\nDuration: {} seconds'.format(data[0][0], data[0][1], data[0][2]))
+
+                    # Print matching playlists
+                    cur.execute("SELECT p.title from playlists p, plinclude pl where pl.sid = ? and pl.pid = p.pid", (selectionID,))
+                    playlists = cur.fetchall()
+                    result = "Playlist(s): "
+                    cnt = 0
+                    for p in playlists:
+                        result += p[0] + ", "
+                        cnt += 1
+                    if cnt == 0:
+                        print("This song does not appear in any playlists.\n")
+                    else:
+                        print(result[:len(result) - 2] + "\n")
+                else:  # Add it to a playlist - TODO FINISH THIS
+                    print("adding to a playlist")
+            else:
+                prompt = "Invalid number entered! Please enter a number between 1 and 3: "
+        except ValueError:  # User did not enter a number
+            prompt = "Input was not a number! Please enter a valid number between 1 and 3: "
+        
+        if done == False: userInput = input(prompt)
 
 
 def search_artists():
@@ -268,5 +356,5 @@ def main():
                 else:
                     print("This user-id already exists.")
 
-search_artists()
-# main()
+# search_artists()
+main()

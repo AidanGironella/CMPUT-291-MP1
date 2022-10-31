@@ -71,13 +71,13 @@ def search_artists():
 
         for j in data:
             print(j)
+
             i +=1
             if i == len(data):
                 print(i, 'hi')
                 print('This is end of our search result.'.center(150, '-'))
                 UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
                 search_song(UserInput)
-
 
             if i % 5 == 0:
                 print()

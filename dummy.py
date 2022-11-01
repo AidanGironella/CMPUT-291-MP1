@@ -37,7 +37,6 @@ def start_session(id):
 
     return sno
 
-
 def search_songs_playlists():
     clearTerminal()
     while True:
@@ -92,7 +91,6 @@ def search_songs_playlists():
                     prompt = "\nPlease select a row number, or type 'more' to see more results: "
 
             if done == False: userInput = input(prompt).lower()
-
 
 # TODO -  If a playlist is selected, the id, the title and the duration of all songs in the playlist should be listed.
 def song_action(selectionID, selectionTitle, songOrPlaylist):
@@ -235,7 +233,10 @@ def search_song(UserInput, array):
             print(i)
 
         print()
-        # SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
+        SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
+
+        # TODO -- implement function song_action here. Proper parameters need to be added in it
+        song_action()
 
 def user_session(id):
 
@@ -280,8 +281,6 @@ def user_session(id):
         else:
             print("Please enter a valid Option #")
 
-
-
 def add_song(id, title, duration):
     artits_id = input("Please provide the ids of any additional artist who have performed this song separated by space: ")
     cur.execute("select * from songs")
@@ -311,8 +310,6 @@ def add_song(id, title, duration):
         else:
             cur.execute("INSERT INTO perform (aid, sid) VALUES (?,?)", (aid, sid))
             conn.commit()
-
-
 
 def artist_session(id):
     # "Artist Session"
@@ -461,5 +458,4 @@ def main():
                 else:
                     print("This user-id already exists.")
 
-search_artists()
-# main()
+main()

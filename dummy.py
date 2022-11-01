@@ -146,32 +146,67 @@ def song_action(selectionID, selectionTitle, songOrPlaylist):
 
 
 def search_artists():
-    keyword = input('Search for an artist\'s name: ').strip()
-    cur.execute("with e1 as (Select a.name ename, count(a.name) num from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and (s.title like '%{}%' or a.name like '%{}%') group by ename)".format(keyword, keyword) + " Select a.name, a.nationality, count(s.sid) from songs s, artists a, perform p, e1 where a.aid = p.aid and s.sid = p.sid and e1.ename = a.name group by a.name order by num desc")
-    data = cur.fetchall()
+    keyword = input('Enter one or more unique keywords to search for an artist\'s name: ').strip()  # Input
+    ArrKeyword = keyword.split()  # Splitting keywords into an array
+    queried_data = []
 
-    if len(data) == 0:
+    # Fetching name of artists having the inputted keywords
+    for i in range(len(ArrKeyword)):
+        cur.execute(
+            "Select a.name, s.title from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and (s.title like '%{}%' or a.name like '%{}%');".format(
+                ArrKeyword[i], ArrKeyword[i]))
+        data = cur.fetchall()
+
+        queried_data += data
+
+    artistData = []
+
+    # Adding names of artists into artistData array
+    for i in range(len(queried_data)):
+        artistData.append(queried_data[i][0])
+
+    # Sorting the data acc to number of matching keywords
+    artistData = sorted(artistData, key=artistData.count, reverse=True)
+
+    # Removing duplicate entries after sorting
+    artistData = list(dict.fromkeys((artistData)))
+
+    # Fetching name, nationality & count of songs for a given set of artists using artistsData
+    result = []
+    j = 1
+    for i in artistData:
+        cur.execute(
+            'Select a.name, a.nationality, count(s.sid) from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = "{}" group by a.name'.format(
+                i))
+        row = cur.fetchone()
+        result += [[str(j)] + list(row)]
+        j += 1
+
+    # Printing according to 5 per page
+    if len(result) == 0:
         print('\nSorry! There is no artist with this name')
 
     else:
-        i = 0
-        print()
-        print(str('Found ' + str(len(data)) + ' matching results (Name, Nationality, Number of Songs)').center(150, '-'))
+        count = 0
+        print(str('\n' + 'Found ' + str(
+            len(data)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
+        for k in result:
+            print(k)
 
-        for j in data:
-            print(j)
-
-            i +=1
-            if i == len(data):
-                print(i, 'hi')
+            count += 1
+            if i == len(result):
                 print('This is end of our search result.'.center(150, '-'))
-                UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
-                search_song(UserInput)
+                UserInput = input('Do you want to terminate searching ' + str(
+                    len(result) - count) + ' left (Press N) or Select the artist (type it\'snumber)? ').strip()
+                if UserInput.lower() == 'n':
+                    break
+                else:
+                    search_song(UserInput, result)
 
-            if i % 5 == 0:
+            elif count % 5 == 0:
                 print()
-                UserInput = input('Do you want to continue searching ' + str(len(data) -i) + ' left (Press Y/N) or Select an artist (type name)? ').strip()
-                print()
+                UserInput = input('Do you want to continue searching ' + str(
+                    len(result) - count) + ' left (Press Y/N) or Select the artist (type it\'s number)? ').strip()
                 if UserInput.lower() == 'y':
                     continue
 
@@ -179,29 +214,28 @@ def search_artists():
                     print()
                     print('This is end of our search result.'.center(150, '-'))
                     break
-
                 else:
-                    search_song(UserInput)
+                    search_song(UserInput, result)
                     break
 
-def search_song(UserInput):
+def search_song(UserInput, array):
     # created for search_artist function to avoid writing duplicate code. This function is not required by assignment schema
+    try: int(UserInput)
+    except ValueError:
+        print('Invalid choice!!')
+    else:
+        cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = '{}';".format(array[int(UserInput)-1][1]))
+        artist_data = cur.fetchall()
 
-    cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name in {};".format((UserInput.title(), UserInput.lower(), UserInput.upper(), UserInput.capitalize())))
-    artist_data = cur.fetchall()
+        if len(artist_data) == 0:
+            print('Invalid choice! Try again later ')
 
-    if len(artist_data) == 0:
-        print('Invalid choice! Try again later ')
+        print(str('Songs of ' + array[int(UserInput)-1][1] + ' (id, title, duration)').center(150, '-'))
+        for i in artist_data:
+            print(i)
 
-    print(str('Songs of ' + UserInput.title() + ' (id, title, duration)').center(150, '-'))
-    for i in artist_data:
-        print(i)
-
-    print()
-    SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
-
-
-
+        print()
+        # SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
 
 def user_session(id):
 
@@ -427,5 +461,5 @@ def main():
                 else:
                     print("This user-id already exists.")
 
-# search_artists()
-main()
+search_artists()
+# main()

@@ -303,8 +303,8 @@ def add_song(id, title, duration):
     conn.commit()
 
     for aid in artits_list:
-        # TODO Finish the checking whether the artist exist in DB 
         cur.execute("select * from artists where lower(aid) = ?", (aid.lower(), ))
+        data = cur.fetchall()
         if not data:
             print("Artit "+ aid + " does not exists in the Database")
         else:
@@ -313,13 +313,13 @@ def add_song(id, title, duration):
 
 def artist_session(id):
     # "Artist Session"
-    menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists"
+    menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists\n3. Log out"
 
     while True:
         print(menu)
         user_option = input(str("Please enter an option #: "))
 
-        while(user_option not in ["1", "2"]):
+        while(user_option not in ["1", "2", "3"]):
             clearTerminal()
             print(menu)
             user_option = input(str("Invalid option entered. Please enter an option #: "))
@@ -337,6 +337,8 @@ def artist_session(id):
                 print("Song exists")
                 time.sleep(1)
                 clearTerminal()
+        if user_option == "3":
+            break
 
             
 
@@ -389,17 +391,25 @@ def main():
                 "uid" if user_option == "1" else "aid"), (id, userpass))
             data = cur.fetchall()
 
+            response = "0"
+            count = 0
             while (not data):
+                if (count >= 1):
+                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    if response == "1":
+                        break
                 userpass = getpass(prompt="Incorrect password. Please try again: ")
                 cur.execute("select {} from {} where {}=? and pwd=?".format(
                     "uid" if user_option == "1" else "aid", "users" if user_option == "1" else "artists",
                     "uid" if user_option == "1" else "aid"), (id, userpass))
                 data = cur.fetchall()
+                count = count+1
             
-            print("Log-in Successful! Navigating to main screen...")
-            time.sleep(1.2)
-            clearTerminal()
-            user_session(id) if user_option == "1" else artist_session(id)
+            if response != "1":
+                print("Log-in Successful! Navigating to main screen...")
+                time.sleep(1.2)
+                clearTerminal()
+                user_session(id) if user_option == "1" else artist_session(id)
 
 
         # If the id exists for only the user
@@ -408,10 +418,17 @@ def main():
             cur.execute("select uid from users where uid=? and pwd=?", (id, userpass))
             data = cur.fetchall()
 
+            response = "0"
+            count = 0
             while (not data):
-                userpass = getpass(prompt="Incorrect password. Please try again: ")
+                if (count >= 1):
+                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    if response == "1":
+                        break
+                userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
                 cur.execute("select uid from users where uid=? and pwd=?", (id, userpass))
                 data = cur.fetchall()
+                count = count+1
             else:
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(0)
@@ -424,17 +441,24 @@ def main():
             cur.execute("select aid from artists where aid=? and pwd=?", (id, userpass))
             data = cur.fetchall()
 
+            response = "0"
+            count = 0
             while (not data):
-                userpass = getpass(prompt="Incorrect password. Please try again: ")
+                if (count >= 1):
+                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    if response == "1":
+                        break
+                userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
                 cur.execute("select aid from artists where aid=? and pwd=?", (id, userpass))
                 data = cur.fetchall()
+                count = count+1
             else:
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(0)
                 clearTerminal()
                 artist_session(id)
 
-                # Invalid Id. Ask for Sign-up
+        # Invalid Id. Ask for Sign-up
         else:
             print("No valid user or artist ID found. Would you like to sign-up as a new user?")
             user_option = input(str("Press 1 to continue!! \nPress anything else to go back to Log-in Terminal ")).strip()

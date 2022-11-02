@@ -142,7 +142,6 @@ def song_action(selectionID, selectionTitle, songOrPlaylist):
         
         if done == False: userInput = input(prompt)
 
-
 def search_artists():
     keyword = input('Enter one or more unique keywords to search for an artist\'s name: ').strip()  # Input
     ArrKeyword = keyword.split()  # Splitting keywords into an array
@@ -311,6 +310,26 @@ def add_song(id, title, duration):
             cur.execute("INSERT INTO perform (aid, sid) VALUES (?,?)", (aid, sid))
             conn.commit()
 
+def find_top_fans_and_playlist(artistId):
+    # list top 3 users who listen to their songs the longest time
+    cur.execute("select uid from (Select l.uid, sum(s.duration*l.cnt) as time from songs s, listen l, perform p where s.sid = l.sid and s.sid = p.sid and p.aid = '{}' group by l.uid order by time desc limit 3)".format(artistId))
+    users = cur.fetchall()
+    print("Top 3 Users ID who listen to your songs the longest time \n")
+    for i in users:
+        print(i)
+
+    print("-".center(150, '-'))
+
+    # list top 3 playlists that include the largest number of their songs.
+    cur.execute("select pid from (Select pid, count(sid) from plinclude where sid in (Select s.sid from songs s, perform p where s.sid = p.sid and p.aid = '{}') group by pid order by count(sid) desc limit 3) ".format(artistId))
+    playlists = cur.fetchall()
+    print("Top 3 Playlists ID that include the largest number of your songs. \n")
+    for j in playlists:
+        print(j)
+
+find_top_fans_and_playlist('a11')
+
+
 def artist_session(id):
     # "Artist Session"
     menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists\n3. Log out"
@@ -339,8 +358,6 @@ def artist_session(id):
                 clearTerminal()
         if user_option == "3":
             break
-
-            
 
 def clearTerminal():
     os.system('cls' if os.name == 'nt' else 'clear')  # Clear the system terminal to look cleaner

@@ -5,7 +5,8 @@ import time
 from getpass import getpass
 import sys
 
-conn = sqlite3.connect('./temp.db')
+database_name = input("Please provide the database name. Make sure to include extension in file name. ")
+conn = sqlite3.connect(database_name)
 cur = conn.cursor()
 
 
@@ -262,18 +263,18 @@ def user_session(id):
         elif user_option == "4":
             now = datetime.now()
             current_date = now.date()
-            cur.execute("UPDATE sessions set end = ? where uid = ? and sno = ?", (current_date, id, returned_sno))
+            cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and sno = ?", (current_date, id.lower(), returned_sno))
             conn.commit()
         elif user_option == "5":
             now = datetime.now()
             current_date = now.date()
-            cur.execute("UPDATE sessions set end = ? where uid = ? and end IS NULL", (current_date, id))
+            cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and end IS NULL", (current_date, id.lower()))
             conn.commit()
             break
         elif user_option == "6":
             now = datetime.now()
             current_date = now.date()
-            cur.execute("UPDATE sessions set end = ? where uid = ? and end IS NULL", (current_date, id))
+            cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and end IS NULL", (current_date, id.lower()))
             conn.commit()    
             clearTerminal()        
             sys.exit()
@@ -327,8 +328,6 @@ def find_top_fans_and_playlist(artistId):
     for j in playlists:
         print(j)
 
-find_top_fans_and_playlist('a11')
-
 
 def artist_session(id):
     # "Artist Session"
@@ -344,19 +343,27 @@ def artist_session(id):
             user_option = input(str("Invalid option entered. Please enter an option #: "))
 
         if user_option == "1":
-            title = (input("Please provide the title of the song: ")).lower()
+            title = input("Please provide the title of the song: ")
             duration = input("Please provide the duration of the song (in seconds): ")
-            cur.execute("select * from songs where lower(title) = ? and duration = ?", (title, duration))
+            cur.execute("select * from perform, songs where perform.sid = songs.sid and lower(perform.aid) = ? and lower(title) = ? and duration = ?", (id.lower(), title.lower(), duration))
             data = cur.fetchall()
 
             if not data:
                 # we can add a song
                 add_song(id, title, duration)
             else:
-                print("Song exists")
+                response = input("WARNING: Song exists\nPress 1. To reject the Song\nPress 2. To still add it as New Song ")
+                if response == "1":
+                    clearTerminal()
+                elif response == "2":
+                    add_song(id, title, duration)
+                else:
+                    print("Wrong input. Going back to MENU")
                 time.sleep(1)
                 clearTerminal()
-        if user_option == "3":
+        elif user_option == "2":
+            find_top_fans_and_playlist(id)
+        elif user_option == "3":
             break
 
 def clearTerminal():
@@ -370,7 +377,7 @@ def main():
 
         clearTerminal()  # Clear the system terminal to look cleaner
         id = input("Login Screen: Please enter your ID:  ").strip()
-        cur.execute("select name from users where uid=?", (id,))
+        cur.execute("select name from users where lower(uid)=?", (id.lower(),))
         data = cur.fetchall()
 
         if not data:
@@ -379,7 +386,7 @@ def main():
             userfound = True
             foundUserName = data[0][0]
 
-        cur.execute("select name from artists where aid=?", (id,))
+        cur.execute("select name from artists where lower(aid)=?", (id.lower(),))
         data = cur.fetchall()
 
         if not data:
@@ -397,6 +404,7 @@ def main():
             user_option = 0
             user_option = input("\nPlease enter your option: ")
 
+            # TODO Implement the Case-Inssensitive functionality in cur.execute statements
             while (user_option != "1" and user_option != "2"):
                 print("\r", end="")
                 user_option = input("Invalid option. Please enter either 1 for user or 2 for artist: ").strip()
@@ -432,7 +440,7 @@ def main():
         # If the id exists for only the user
         elif (userfound == True and artistfound == False):
             userpass = getpass(prompt="Please enter your password: ")
-            cur.execute("select uid from users where uid=? and pwd=?", (id, userpass))
+            cur.execute("select uid from users where lower(uid)=? and pwd=?", (id.lower(), userpass))
             data = cur.fetchall()
 
             response = "0"
@@ -443,7 +451,7 @@ def main():
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
-                cur.execute("select uid from users where uid=? and pwd=?", (id, userpass))
+                cur.execute("select uid from users where lower(uid)=? and pwd=?", (id.lower(), userpass))
                 data = cur.fetchall()
                 count = count+1
             else:
@@ -455,7 +463,7 @@ def main():
         # If the id exists for only the artists
         elif (userfound == False and artistfound == True):
             userpass = getpass(prompt="Please Enter your Password: ")
-            cur.execute("select aid from artists where aid=? and pwd=?", (id, userpass))
+            cur.execute("select aid from artists where lower(aid)=? and pwd=?", (id.lower(), userpass))
             data = cur.fetchall()
 
             response = "0"
@@ -466,7 +474,7 @@ def main():
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
-                cur.execute("select aid from artists where aid=? and pwd=?", (id, userpass))
+                cur.execute("select aid from artists where lower(aid)=? and pwd=?", (id.lower(), userpass))
                 data = cur.fetchall()
                 count = count+1
             else:
@@ -482,7 +490,7 @@ def main():
 
             if user_option == "1":
                 id = input("Please provide a user-id: ").strip()
-                cur.execute("select uid from users where uid=?", (id,))
+                cur.execute("select uid from users where lower(uid)=?", (id.lower(),))
                 data = cur.fetchall()
 
                 if not data:
@@ -498,5 +506,6 @@ def main():
 
                 else:
                     print("This user-id already exists.")
+                    time.sleep(1.2)
 
 main()

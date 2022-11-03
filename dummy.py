@@ -74,13 +74,13 @@ def search_songs_playlists(id):
                 query += "(title like '%{}%') or ".format(k)  # Find playlists with matching keywords in title
         # We cut off the last three characters because the last loop above will append "or " to the string even for the last keyword
         query = query[:len(query) - 3] + ") select sid, title, duration, ("  # Get matching songs
-        for k in uniqueKeywords:  # Get the number of keyword matches in songs
+        for k in uniqueKeywords:  # Get the number of keyword matches in songs (rank += 1 for each match, then order by rank later)
             query += "case when title like '%{}%' then 1 else 0 end + ".format(k)
         query = query[:len(query) - 3] + ") as rank, 'Song' from songs where "
         for k in uniqueKeywords:  # Construct the WHERE clause
             query += "(title like '%{}%') or ".format(k)
         query =  query[:len(query) - 3] + "union select p.pid, p.title, sum(s.duration) as duration, ("  # Get matching playlist info
-        for k in uniqueKeywords:  # Get the number of keyword matches in the playlist title
+        for k in uniqueKeywords:  # Get the number of keyword matches in the playlist title (rank += 1 for each match, then order by rank later)
             query += "case when p.title like '%{}%' then 1 else 0 end + ".format(k)
         query = query[:len(query) - 3] + ") as rank, 'Playlist' from playlists p, plinclude pl, temp t, songs s "
         query += "where p.pid = t.pid and p.pid = pl.pid and pl.sid = s.sid group by p.pid order by rank DESC "

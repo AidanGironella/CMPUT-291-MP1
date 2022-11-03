@@ -101,7 +101,7 @@ def search_songs_playlists(id):
         else:  # No results
             print("No matching songs or playlists")
 
-# TODO -  If a playlist is selected, the id, the title and the duration of all songs in the playlist should be listed.
+
 def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
     # Song Action
     if songOrPlaylist == 'Playlist':  # User selected a playlist
@@ -243,7 +243,7 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
             
             if done == False: userInput = input(prompt)
 
-def search_artists():
+def search_artists(uid):
     keyword = input('Enter one or more unique keywords to search for an artist\'s name: ').strip()  # Input
     ArrKeyword = keyword.split()  # Splitting keywords into an array
     queried_data = []
@@ -313,10 +313,10 @@ def search_artists():
                     print('This is end of our search result.'.center(150, '-'))
                     break
                 else:
-                    search_song(UserInput, result)
+                    search_song(UserInput, result, uid)
                     break
 
-def search_song(UserInput, array):
+def search_song(UserInput, array, uid):
     # created for search_artist function to avoid writing duplicate code. This function is not required by assignment schema
     try: int(UserInput)
     except ValueError:
@@ -329,14 +329,15 @@ def search_song(UserInput, array):
             print('Invalid choice! Try again later ')
 
         print(str('Songs of ' + array[int(UserInput)-1][1] + ' (id, title, duration)').center(150, '-'))
+        songs = {}
         for i in artist_data:
             print(i)
+            songs[i[1]] = i[0]
 
         print()
         SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
 
-        # TODO -- implement function song_action here. Proper parameters need to be added in it
-        song_action()
+        song_action(uid, songs[SongSelection], SongSelection, 'Song')
 
 def user_session(id):
 
@@ -359,7 +360,7 @@ def user_session(id):
             search_songs_playlists(id)
 
         elif user_option == "3":
-            search_artists()
+            search_artists(id)
 
         elif user_option == "4":
             now = datetime.now()

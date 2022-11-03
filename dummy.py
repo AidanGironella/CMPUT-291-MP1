@@ -5,8 +5,8 @@ import time
 from getpass import getpass
 import sys
 
-database_name = input("Please provide the database name. Make sure to include extension in file name. ")
-conn = sqlite3.connect(database_name)
+# database_name = input("Please provide the database name. Make sure to include extension in file name. ")
+conn = sqlite3.connect('temp.db')
 cur = conn.cursor()
 
 
@@ -401,16 +401,20 @@ def search_song(UserInput, array, uid):
 
         print(str('Songs of ' + array[int(UserInput)-1][1] + ' (id, title, duration)').center(150, '-'))
         songs = {}  # Dictionary to store the sid of the songs
-        for i in artist_data:
-            print(i)
-            songs[i[1]] = i[0]  # Keep track of this song's sid
 
         for i in artist_data:
             print(i)  # Finally printing the song's list
             songs[i[0]] = i[1]  # Keep track of this song's sid
         print()
-        SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
 
+        # Asking User for to select a song & perform song action
+        SongSelection = (input('Do you want to select any song - Enter it\'s song number: ').strip())
+        try:
+            songs[int(SongSelection)]
+        except ValueError:
+            print('Incorrect Input!!')
+        else:
+            song_action(uid, int(SongSelection), songs[int(SongSelection)], 'Song')
         song_action(uid, songs[SongSelection], SongSelection, 'Song')
 
 
@@ -796,5 +800,6 @@ def main():
                     time.sleep(1.2)
 
 
-main()
+# main()
+search_artists('u1')
 

@@ -11,11 +11,15 @@ cur = conn.cursor()
 
 
 def start_session(id):
-    # Implement Start a session
-    print()
+
+    # Implemented Start a session. 
+    # Just made a change
     cur.execute("select * from sessions where lower(uid)=?", (id.lower(),))
     data = cur.fetchall()
-    id = data[0][0]
+    if not data:
+        id = id
+    else:
+        id = data[0][0]
 
     # Storing all the Sno related to given Uid
     store = []
@@ -30,14 +34,17 @@ def start_session(id):
             break
         i = i + 1
 
+    # Information is used to store the start date of the session.
     now = datetime.now()
     current_date = now.date()
 
+    # Creating a new session for the user.
     query_vals = (id, sno, current_date)
     cur.execute("INSERT INTO sessions (uid, sno, start) VALUES (?,?,?)", query_vals)
     conn.commit()
 
     return sno
+
 
 def search_songs_playlists():
     clearTerminal()
@@ -241,37 +248,46 @@ def search_song(UserInput, array):
 
 def user_session(id):
 
-    # User Session
+    # User Session with its menu
     menu = "User Session\n1. Start a session\n2. Search for songs and playlists\n3. Search for artists\n4. End the session\n5. Log out\n6. Exit the System"
     while True:
         print(menu)
 
+        # Ensure the expected input is provided and unexpected behaviour is elimated
         user_option = input(str("Please enter an option #: "))
         while(user_option not in ["1", "2", "3", "4","5","6"]):
             clearTerminal()
             print(menu)
             user_option = input(str("Invalid option entered. Please enter an option #: "))
 
+        # Start a new Session.
         if user_option == "1":
             returned_sno = start_session(id)
 
+        # Search songs and playlists from the database.
         elif user_option == "2":
             search_songs_playlists()
 
+        # Search different artists from the database 
         elif user_option == "3":
             search_artists()
 
+        # End the ongoing/current session of the user.
         elif user_option == "4":
             now = datetime.now()
             current_date = now.date()
             cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and sno = ?", (current_date, id.lower(), returned_sno))
             conn.commit()
+
+        # Allows user to Log-out and end any of their ongoing sessions.
         elif user_option == "5":
             now = datetime.now()
             current_date = now.date()
             cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and end IS NULL", (current_date, id.lower()))
             conn.commit()
             break
+
+        # Allows user to Exit from the ssytem and end any of their ongoing sessions.
         elif user_option == "6":
             now = datetime.now()
             current_date = now.date()
@@ -279,23 +295,32 @@ def user_session(id):
             conn.commit()    
             clearTerminal()        
             sys.exit()
+
+        # Case when an expected input is provided.
         else:
             print("Please enter a valid Option #")
 
+
 def add_song(id, title, duration):
 
-    # cur.execute("select * from artits")
-    # data = cur.fetchall()   
+    # Checking if the artists already exist in the database. If yes, we obtain their aid that exist in our system.
     cur.execute("select * from artists where lower(aid)=?", (id.lower(),))
     data = cur.fetchall()
-    id = data[0][0]
 
+    # Just made a change here
+    if not data:
+        id = id
+    else:
+        id = data[0][0]
+
+    # Asking the artist to provide the ids of all others artists who have performed the song with them.
     artits_id = input("Please provide the ids of any additional artist who have performed this song separated by space: ")
     cur.execute("select * from songs")
     data = cur.fetchall()
     store = []
     i = 1
 
+    # Obtaining the unique sid
     for row in data:
         store.append(row[0])
 
@@ -305,23 +330,34 @@ def add_song(id, title, duration):
             break
         i = i + 1
 
+    # Creating a list of all other artists. And inserting the song to the songs table in our table with unique sid.
     artits_list = artits_id.split()
     artits_list.append(id)
     cur.execute("INSERT INTO songs (sid, title, duration) VALUES (?,?,?)", (sid, title, duration))
     conn.commit()
 
+    # for Each additional artists who performed the song, the perform tables get updated to reflect the same.
     for aid in artits_list:
         cur.execute("select * from artists where lower(aid) = ?", (aid.lower(), ))
         data = cur.fetchall()
+
+        # Checking if the artists exist in our database.
         if not data:
             print("Artit "+ aid + " does not exists in the Database")
         else:
             # To ensure that Iam only using the aid in the case format that it appears in my database.
             cur.execute("select * from artists where lower(aid)=?", (aid.lower(),))
             data = cur.fetchall()
-            aid = data[0][0]
+
+            # Just made a change here
+            if not data:
+                aid = aid
+            else:
+                aid = data[0][0]
+
             cur.execute("INSERT INTO perform (aid, sid) VALUES (?,?)", (aid, sid))
             conn.commit()
+
 
 def find_top_fans_and_playlist(artistId):
     # list top 3 users who listen to their songs the longest time
@@ -342,25 +378,27 @@ def find_top_fans_and_playlist(artistId):
 
 
 def artist_session(id):
-    # "Artist Session"
+    # "Artist Session" with the menu
     menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists\n3. Log out"
 
     while True:
         print(menu)
         user_option = input(str("Please enter an option #: "))
 
+        # Ensuring that proper input is provided.
         while(user_option not in ["1", "2", "3"]):
             clearTerminal()
             print(menu)
             user_option = input(str("Invalid option entered. Please enter an option #: "))
 
+        # Allow the artists to add a song and obtaining the song title and duration
         if user_option == "1":
             title = input("Please provide the title of the song: ")
             duration = input("Please provide the duration of the song (in seconds): ")
             cur.execute("select * from perform, songs where perform.sid = songs.sid and lower(perform.aid) = ? and lower(title) = ? and duration = ?", (id.lower(), title.lower(), duration))
             data = cur.fetchall()
             
-
+            # If the song does not exist already, adding to the table Otherwise a warning is generated.
             if not data:
                 # we can add a song
                 add_song(id, title, duration)
@@ -372,8 +410,10 @@ def artist_session(id):
                     add_song(id, title, duration)
                 else:
                     print("Wrong input. Going back to MENU")
-                time.sleep(1)
+                time.sleep(1.5)
                 clearTerminal()
+        
+        # Allow the user to find the 
         elif user_option == "2":
             find_top_fans_and_playlist(id)
         elif user_option == "3":
@@ -417,16 +457,16 @@ def main():
             user_option = 0
             user_option = input("\nPlease enter your option: ")
 
-            # TODO Implement the Case-Inssensitive functionality in cur.execute statements
+            # Just made a few changes
             while (user_option != "1" and user_option != "2"):
                 print("\r", end="")
                 user_option = input("Invalid option. Please enter either 1 for user or 2 for artist: ").strip()
-
+            
             userpass = getpass(
                 prompt=("Please enter your password (as a" + (" user): " if user_option == "1" else "n artist): ")))
             cur.execute("select {} from {} where {}=? and pwd=?".format(
                 "uid" if user_option == "1" else "aid", "users" if user_option == "1" else "artists",
-                "uid" if user_option == "1" else "aid"), (id, userpass))
+                "lower(uid)" if user_option == "1" else "lower(aid)"), (id.lower(), userpass))
             data = cur.fetchall()
 
             response = "0"
@@ -437,9 +477,11 @@ def main():
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password. Please try again: ")
+
+                # Just made a few changes
                 cur.execute("select {} from {} where {}=? and pwd=?".format(
                     "uid" if user_option == "1" else "aid", "users" if user_option == "1" else "artists",
-                    "uid" if user_option == "1" else "aid"), (id, userpass))
+                    "lower(uid)" if user_option == "1" else "lower(aid)"), (id.lower(), userpass))
                 data = cur.fetchall()
                 count = count+1
             

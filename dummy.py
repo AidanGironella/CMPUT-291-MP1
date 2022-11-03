@@ -325,7 +325,7 @@ def add_song(id, title, duration):
 
 def find_top_fans_and_playlist(artistId):
     # list top 3 users who listen to their songs the longest time
-    cur.execute("select uid from (Select l.uid, sum(s.duration*l.cnt) as time from songs s, listen l, perform p where s.sid = l.sid and s.sid = p.sid and p.aid = '{}' group by l.uid order by time desc limit 3)".format(artistId))
+    cur.execute("select uid from ( )".format(artistId))
     users = cur.fetchall()
     print("Top 3 Users ID who listen to your songs the longest time \n")
     for i in users:
@@ -334,7 +334,7 @@ def find_top_fans_and_playlist(artistId):
     print("-".center(150, '-'))
 
     # list top 3 playlists that include the largest number of their songs.
-    cur.execute("select pid from (Select pid, count(sid) from plinclude where sid in (Select s.sid from songs s, perform p where s.sid = p.sid and p.aid = '{}') group by pid order by count(sid) desc limit 3) ".format(artistId))
+    cur.execute("select pid from (Select pid, count(sid) from plinclude where sid in (Select s.sid from songs s, perform p where s.sid = p.sid and p.aid in {}) group by pid order by count(sid) desc limit 3) ".format((artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
     playlists = cur.fetchall()
     print("Top 3 Playlists ID that include the largest number of your songs. \n")
     for j in playlists:

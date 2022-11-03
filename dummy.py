@@ -13,8 +13,9 @@ cur = conn.cursor()
 def start_session(id):
     # Implement Start a session
     print()
-    cur.execute("select * from sessions where uid=?", (id,))
+    cur.execute("select * from sessions where lower(uid)=?", (id.lower(),))
     data = cur.fetchall()
+    id = data[0][0]
 
     # Storing all the Sno related to given Uid
     store = []
@@ -282,6 +283,13 @@ def user_session(id):
             print("Please enter a valid Option #")
 
 def add_song(id, title, duration):
+
+    # cur.execute("select * from artits")
+    # data = cur.fetchall()   
+    cur.execute("select * from artists where lower(aid)=?", (id.lower(),))
+    data = cur.fetchall()
+    id = data[0][0]
+
     artits_id = input("Please provide the ids of any additional artist who have performed this song separated by space: ")
     cur.execute("select * from songs")
     data = cur.fetchall()
@@ -308,6 +316,10 @@ def add_song(id, title, duration):
         if not data:
             print("Artit "+ aid + " does not exists in the Database")
         else:
+            # To ensure that Iam only using the aid in the case format that it appears in my database.
+            cur.execute("select * from artists where lower(aid)=?", (aid.lower(),))
+            data = cur.fetchall()
+            aid = data[0][0]
             cur.execute("INSERT INTO perform (aid, sid) VALUES (?,?)", (aid, sid))
             conn.commit()
 
@@ -347,6 +359,7 @@ def artist_session(id):
             duration = input("Please provide the duration of the song (in seconds): ")
             cur.execute("select * from perform, songs where perform.sid = songs.sid and lower(perform.aid) = ? and lower(title) = ? and duration = ?", (id.lower(), title.lower(), duration))
             data = cur.fetchall()
+            
 
             if not data:
                 # we can add a song

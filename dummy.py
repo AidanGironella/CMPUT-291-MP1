@@ -5,8 +5,8 @@ import time
 from getpass import getpass
 import sys
 
-# database_name = input("Please provide the database name. Make sure to include extension in file name. ")
-conn = sqlite3.connect('temp.db')
+database_name = input("Please provide the database name. Make sure to include extension in file name. ")
+conn = sqlite3.connect(database_name)
 cur = conn.cursor()
 
 
@@ -800,6 +800,6 @@ def main():
                     time.sleep(1.2)
 
 
-# main()
-search_artists('u1')
+main()
+
 

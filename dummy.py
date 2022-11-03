@@ -52,6 +52,7 @@ def start_session(id):
 
     return sno
 
+
 def search_songs_playlists(id):
     '''
     Function to search for songs and playlists
@@ -61,7 +62,7 @@ def search_songs_playlists(id):
     '''
     while True:
         keyword = input("Please enter one or more keywords to search for, each separated by a single space: ")
-        if(keyword.lower()) == '/exit':  # Let the user exit this function
+        if (keyword.lower()) == '/exit':  # Let the user exit this function
             clearTerminal()
             break
         keywords = keyword.split(' ')
@@ -79,7 +80,8 @@ def search_songs_playlists(id):
         query = query[:len(query) - 3] + ") as rank, 'Song' from songs where "
         for k in uniqueKeywords:  # Construct the WHERE clause
             query += "(title like '%{}%') or ".format(k)
-        query =  query[:len(query) - 3] + "union select p.pid, p.title, sum(s.duration) as duration, ("  # Get matching playlist info
+        query = query[:len(
+            query) - 3] + "union select p.pid, p.title, sum(s.duration) as duration, ("  # Get matching playlist info
         for k in uniqueKeywords:  # Get the number of keyword matches in the playlist title
             query += "case when p.title like '%{}%' then 1 else 0 end + ".format(k)
         query = query[:len(query) - 3] + ") as rank, 'Playlist' from playlists p, plinclude pl, temp t, songs s "
@@ -89,30 +91,31 @@ def search_songs_playlists(id):
         data = cur.fetchall()
         i = 1  # Variable to keep track of the option numbers
         for row in data:  # Build up a list of the search results for easy printing
-            results.append('{}.\t{} ID: {} | Title: {} | Duration: {} seconds'.format(i, row[4], row[0], row[1], row[2]))
-            i+=1
+            results.append(
+                '{}.\t{} ID: {} | Title: {} | Duration: {} seconds'.format(i, row[4], row[0], row[1], row[2]))
+            i += 1
         if i > 1:
             # menu = "Please enter one or more keywords to search for, each separated by a single space: "
             # + keyword + "\nTotal number of results: {}".format(i-1)
-            print("Total number of results: {}".format(i-1))
+            print("Total number of results: {}".format(i - 1))
             j = 0
-            print(*results[j:j+5],sep="\n")  # Print first 5 results
+            print(*results[j:j + 5], sep="\n")  # Print first 5 results
             j += 5
             userInput = input("\nPlease select a row number, or type 'more' to see more results: ").lower()
             done = False
             while done == False:
-                if(userInput.lower()) == '/exit':
+                if (userInput.lower()) == '/exit':
                     clearTerminal()
                     break
                 prompt = "\nUnrecognized input. Please select a row number, or type 'more' to see more results: "
                 try:  # User entered a number
-                    userInput = int(userInput)-1
+                    userInput = int(userInput) - 1
                     if (userInput in range(len(data))):  # The number entered is a valid option
                         done = True
                         song_action(id, data[userInput][0], data[userInput][1], data[userInput][4])
                 except ValueError:  # User entered a string
                     if userInput == 'more':
-                        print(*results[j:j+5],sep="\n")  # Print 5 more results
+                        print(*results[j:j + 5], sep="\n")  # Print 5 more results
                         j += 5
                         prompt = "\nPlease select a row number, or type 'more' to see more results: "
 
@@ -144,70 +147,80 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
         i = 1
         for row in data:  # Build up the numbered results
             print('{}.\t Song ID: {} | Title: {} | Duration: {} seconds'.format(i, row[0], row[1], row[2]))
-            i+=1
+            i += 1
         userInput = input("\nPlease select a row number: ").lower()
         done = False
         while done == False:
-            if(userInput) == '/exit':
+            if (userInput) == '/exit':
                 clearTerminal()
                 break
             try:  # User entered a number
-                userInput = int(userInput)-1
+                userInput = int(userInput) - 1
                 if (userInput in range(len(data))):  # Number entered is a valid option
                     done = True
                     song_action(uid, data[userInput][0], data[userInput][1], 'Song')
             except ValueError:  # User entered a string
                 pass
             # Invalid input, keep looping until the user enters something valid
-            if done == False: userInput = input("\nUnrecognized input. Please select a row number, or type 'more' to see more results: ").lower()
+            if done == False: userInput = input(
+                "\nUnrecognized input. Please select a row number, or type 'more' to see more results: ").lower()
     else:  # User selected a song
         clearTerminal()
-        print("1. Listen to '{}'".format(selectionTitle) + "\n2. See more information\n3. Add {} to a playlist".format(selectionTitle))  # Print options
+        print("1. Listen to '{}'".format(selectionTitle) + "\n2. See more information\n3. Add {} to a playlist".format(
+            selectionTitle))  # Print options
         userInput = input("Please select an action to perform for the song '{}': ".format(selectionTitle))
         done = False
         while done == False:
-            if(userInput.lower()) == '/exit':
+            if (userInput.lower()) == '/exit':
                 clearTerminal()
                 break
             prompt = "Unrecognized input. Please select an action to perform for the song '{}': ".format(selectionTitle)
             try:  # User entered a number
                 userInput = int(userInput)  # This will throw an error if the input is not a number
-                if userInput in range(1,4):  # User entered a valid option
+                if userInput in range(1, 4):  # User entered a valid option
                     done = True
                     if userInput == 1:  # Listen to song
-                        cur.execute("SELECT sno from sessions where uid=? and end is null", (uid,))  # Check if user has an active session
+                        cur.execute("SELECT sno from sessions where uid=? and end is null",
+                                    (uid,))  # Check if user has an active session
                         data = cur.fetchall()
                         if not data:  # No active session
                             print("Could not listen, you do not have an active session!\n")
                         else:
-                            sessionNumber = data[0][0]  # This will throw an error if the user does not have an active sesssion
+                            sessionNumber = data[0][
+                                0]  # This will throw an error if the user does not have an active sesssion
                             # See if we have already listened to this song in this session (if yes, increase cnt instead of inserting new entry)
-                            cur.execute("SELECT cnt from listen where uid=? and sno=? and sid=?", (uid,sessionNumber,selectionID,))
+                            cur.execute("SELECT cnt from listen where uid=? and sno=? and sid=?",
+                                        (uid, sessionNumber, selectionID,))
                             data = cur.fetchall()
                             if not data:  # User has not listened to this song in this session - insert a new row
-                                cur.execute("INSERT INTO listen values (?, ?, ?, 1)", (uid, sessionNumber, selectionID,))
+                                cur.execute("INSERT INTO listen values (?, ?, ?, 1)",
+                                            (uid, sessionNumber, selectionID,))
                                 conn.commit()
                             else:  # User has already listened to this song in this session - increase cnt
                                 existingCnt = data[0][0]  # Throws an error if this song is not already in this session
-                                cur.execute("UPDATE listen set cnt = cnt+1 where uid=? and sno=? and sid=?", (uid, sessionNumber, selectionID,))
+                                cur.execute("UPDATE listen set cnt = cnt+1 where uid=? and sno=? and sid=?",
+                                            (uid, sessionNumber, selectionID,))
                                 conn.commit()
                             print("Now listening...\n")
                     elif userInput == 2:  # See more information
                         # Print all artists that performed the song
-                        cur.execute("SELECT a.name from perform p, artists a where p.sid = ? and p.aid = a.aid", (selectionID,))
+                        cur.execute("SELECT a.name from perform p, artists a where p.sid = ? and p.aid = a.aid",
+                                    (selectionID,))
                         artists = cur.fetchall()
                         result = "Artist(s): "  # Start result string
                         for a in artists:
                             result += a[0] + ", "  # Append all artists to result string
-                        print("\n" + result[:len(result) - 2])  # Take off the final ", " from the last artist, then print results
-                        
+                        print("\n" + result[:len(
+                            result) - 2])  # Take off the final ", " from the last artist, then print results
+
                         # Print id, title and duration of song
                         cur.execute("SELECT * from songs where sid = ?;", (selectionID,))
                         data = cur.fetchall()
                         print('Song ID: {}\nTitle: {}\nDuration: {} seconds'.format(data[0][0], data[0][1], data[0][2]))
 
                         # Print matching playlists
-                        cur.execute("SELECT p.title from playlists p, plinclude pl where pl.sid = ? and pl.pid = p.pid", (selectionID,))
+                        cur.execute("SELECT p.title from playlists p, plinclude pl where pl.sid = ? and pl.pid = p.pid",
+                                    (selectionID,))
                         playlists = cur.fetchall()
                         result = "Playlist(s): "
                         cnt = 0  # Tracks the number of playlists this song appears in
@@ -221,17 +234,18 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                     else:  # Add song to a playlist
                         addedToPlaylist = False  # Check if we are done adding the song to a playlist
                         while addedToPlaylist == False:
-                            cur.execute("SELECT * from playlists where uid=?", (uid,))  # Print all of the user's playlists
+                            cur.execute("SELECT * from playlists where uid=?",
+                                        (uid,))  # Print all of the user's playlists
                             data = cur.fetchall()
                             print('0.\t Choose this option to create a new playlist')
                             i = 1
                             for row in data:  # Print playlists
                                 print('{}.\t Playlist ID: {} | Playlist Title: {}'.format(i, row[0], row[1]))
-                                i+=1
+                                i += 1
                             userInput = input("\nPlease select a row number: ").lower()
                             done = False
                             while done == False:
-                                if(userInput) == '/exit':
+                                if (userInput) == '/exit':
                                     clearTerminal()
                                     done = True
                                     addedToPlaylist = True
@@ -241,50 +255,61 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                                     if userInput == 0:  # Create new playlist
                                         done = True
                                         cur.execute("SELECT max(pid) from playlists;")  # Get highest pid for the user
-                                        newPID = int(cur.fetchall()[0][0])+1  # Get a new, unique pid
+                                        newPID = int(cur.fetchall()[0][0]) + 1  # Get a new, unique pid
                                         newPlaylist = input("Please enter the title of your new playlist: ")
                                         cur.execute("INSERT INTO playlists values (?,?,?)", (newPID, newPlaylist, uid,))
                                         conn.commit()
                                         print("Successfully created new playlist.")
-                                    elif userInput in range(len(data)+1):  # User entered a valid playlist
+                                    elif userInput in range(len(data) + 1):  # User entered a valid playlist
                                         done = True
                                         addedToPlaylist = True
-                                        pid = data[userInput-1][0]  # Get the playlist's pid
-                                        cur.execute("SELECT max(sorder) from plinclude where pid=?;", (pid,))  # Get highest song sorder in this playlist
+                                        pid = data[userInput - 1][0]  # Get the playlist's pid
+                                        cur.execute("SELECT max(sorder) from plinclude where pid=?;",
+                                                    (pid,))  # Get highest song sorder in this playlist
                                         data = cur.fetchall()
                                         try:  # There are other songs in the playlist
-                                            newSOrder = int(data[0][0])+1  # Set the next song order
+                                            newSOrder = int(data[0][0]) + 1  # Set the next song order
                                         except:  # Playlist is empty
                                             newSOrder = 1  # This is the first song in the playlist, set sorder to 1
                                         try:
-                                            cur.execute("INSERT INTO plinclude values (?, ?, ?)", (pid, selectionID, newSOrder,))
+                                            cur.execute("INSERT INTO plinclude values (?, ?, ?)",
+                                                        (pid, selectionID, newSOrder,))
                                             conn.commit()
                                             print("Successfully added song to playlist!")
                                         except sqlite3.IntegrityError:  # Error thrown if the selected song already exists in the selected playlist
                                             print("Error: This song is already in this playlist!\n")
                                 except ValueError:  # User entered a string
                                     pass
-                                if done == False: userInput = input("\nUnrecognized input. Please select a row number: ").lower()
+                                if done == False: userInput = input(
+                                    "\nUnrecognized input. Please select a row number: ").lower()
                 else:
                     prompt = "Invalid number entered! Please enter a number between 1 and 3: "
             except ValueError:  # User did not enter a number
                 prompt = "Input was not a number! Please enter a valid number between 1 and 3: "
-            
+
             if done == False: userInput = input(prompt)
 
-def search_artists(uid):
-    keyword = input('Enter one or more unique keywords to search for an artist\'s name: ').strip()  # Input
-    ArrKeyword = keyword.split()  # Splitting keywords into an array
-    queried_data = []
 
-    # Fetching name of artists having the inputted keywords
+def search_artists(uid):
+    '''
+    Function let you search your Artist using some keywords to check out all of his songs where you can select one perform some song actions
+
+    Parameters: uid: Current user id (stored as uid in SQL tables)
+    Returns: none
+    '''
+
+    keyword = input(
+        'Enter one or more unique keywords to search for an artist\'s name: ').strip()  # Input one or more unique keywords to search artist
+    ArrKeyword = keyword.split()  # Splitting keywords into an array of words
+    queried_data = []  # Array for storing data fetched from DB
+
+    # Fetching name of all the artists having the inputted keywords either in their name or in the title of their songs
     for i in range(len(ArrKeyword)):
         cur.execute(
             "Select a.name, s.title from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and (s.title like '%{}%' or a.name like '%{}%');".format(
                 ArrKeyword[i], ArrKeyword[i]))
-        data = cur.fetchall()
-
-        queried_data += data
+        data = cur.fetchall()  # Storing the artist's name & title of his/her songs fetched from DB into array 'data'
+        queried_data += data  # Appending the array 'data' into main array
 
     artistData = []
 
@@ -306,67 +331,98 @@ def search_artists(uid):
             'Select a.name, a.nationality, count(s.sid) from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = "{}" group by a.name'.format(
                 i))
         row = cur.fetchone()
-        result += [[str(j)] + list(row)]
-        j += 1
+        result += [[str(j)] + list(row)]  # Storing fetched data inside result array
+        j += 1  # Increasing the count by 1
 
-    # Printing according to 5 per page
-    if len(result) == 0:
+    # Printing according to 5 rows per page
+    if len(result) == 0:  # Checking whether result is empty or not
         print('\nSorry! There is no artist with this name')
 
     else:
         count = 0
         print(str('\n' + 'Found ' + str(
             len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
-        for k in result:
-            print(k)
 
+        for k in result:
+            print(k)  # Printing the data one by one & increasing the count by 1
             count += 1
-            if i == len(result):
+
+            if count == len(result):  # Asking User what to do next if loop comes on the last record
                 print('This is end of our search result.'.center(150, '-'))
                 UserInput = input('Do you want to terminate searching ' + str(
                     len(result) - count) + ' left (Press N) or Select the artist (type it\'snumber)? ').strip()
+
                 if UserInput.lower() == 'n':
                     break
                 else:
-                    search_song(UserInput, result)
+                    search_song(UserInput, result, uid)
 
-            elif count % 5 == 0:
+            elif count % 5 == 0:  # If count is some multiple of 5
                 print()
                 UserInput = input('Do you want to continue searching ' + str(
                     len(result) - count) + ' left (Press Y/N) or Select the artist (type it\'s number)? ').strip()
-                if UserInput.lower() == 'y':
+
+                if UserInput.lower() == 'y':  # Continue the loop if user says yes
                     continue
 
-                elif UserInput.lower() == 'n':
+                elif UserInput.lower() == 'n':  # Breaks the loop if user says no
                     print()
                     print('This is end of our search result.'.center(150, '-'))
                     break
+
                 else:
-                    search_song(UserInput, result, uid)
+                    search_song(UserInput, result, uid)  # Show all the songs of the artist which user has selected
                     break
 
+
 def search_song(UserInput, array, uid):
-    # created for search_artist function to avoid writing duplicate code. This function is not required by assignment schema
-    try: int(UserInput)
+    # It is created for the use inside of search_artist function to avoid duplicate code. This function is not required by assignment schema
+
+    '''
+    Function let you search for all the song for the selected Artists & execute song actions.
+
+    Parameters:
+        UserInput: Artist number as displayed on the screen
+        array: An array with details of the all the artists found matching the user entered keyword
+        uid: Current user id (stored as uid in SQL tables)
+
+    Returns: none
+    '''
+
+    try:  # To ensure that if user enters anything else than a number then he/she should get an error
+        int(UserInput)
+
     except ValueError:
         print('Invalid choice!!')
+
     else:
-        cur.execute("Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = '{}';".format(array[int(UserInput)-1][1]))
+        # Fetching the list of all the songs performed by the artist
+        cur.execute(
+            "Select s.sid, s.title, s.duration from songs s, artists a, perform p where a.aid = p.aid and s.sid = p.sid and a.name = '{}';".format(
+                array[int(UserInput) - 1][1]))
         artist_data = cur.fetchall()
 
-        if len(artist_data) == 0:
+        if len(artist_data) == 0:  # If there is no songs found for the selected artist
             print('Invalid choice! Try again later ')
 
-        print(str('Songs of ' + array[int(UserInput)-1][1] + ' (id, title, duration)').center(150, '-'))
-        songs = {}  # Dictionary to store the sid of the songs
+        print(str('Songs of ' + array[int(UserInput) - 1][1] + ' (id, title, duration)').center(150, '-'))
+        songs = {}  # Dictionary to store the sid & title of the songs
+
         for i in artist_data:
-            print(i)
-            songs[i[1]] = i[0]  # Keep track of this song's sid
-
+            print(i)  # Finally printing the song's list
+            songs[i[0]] = i[1]  # Keep track of this song's sid
         print()
-        SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
 
-        song_action(uid, songs[SongSelection], SongSelection, 'Song')
+        # Asking User for to select a song & perform song action
+        SongSelection = (input('Do you want to select any song - Enter it\'s song number: ').strip())
+        try:
+            songs[int(SongSelection)]
+        except ValueError:
+            print('Incorrect Input!!')
+        else:
+            song_action(uid, int(SongSelection), songs[int(SongSelection)], 'Song')
+
+
 
 def user_session(id):
     """
@@ -385,7 +441,7 @@ def user_session(id):
 
         # Ensure the expected input is provided and unexpected behaviour is elimated
         user_option = input(str("Please enter an option #: "))
-        while(user_option not in ["1", "2", "3", "4","5","6"]):
+        while (user_option not in ["1", "2", "3", "4", "5", "6"]):
             clearTerminal()
             print(menu)
             user_option = input(str("Invalid option entered. Please enter an option #: "))
@@ -407,7 +463,8 @@ def user_session(id):
         elif user_option == "4":
             now = datetime.now()
             current_date = now.date()
-            cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and sno = ?", (current_date, id.lower(), returned_sno))
+            cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and sno = ?",
+                        (current_date, id.lower(), returned_sno))
             conn.commit()
 
         # Allows user to Log-out and end any of their ongoing sessions.
@@ -423,8 +480,8 @@ def user_session(id):
             now = datetime.now()
             current_date = now.date()
             cur.execute("UPDATE sessions set end = ? where lower(uid) = ? and end IS NULL", (current_date, id.lower()))
-            conn.commit()    
-            clearTerminal()        
+            conn.commit()
+            clearTerminal()
             sys.exit()
 
         # Case when an expected input is provided.
@@ -455,7 +512,8 @@ def add_song(id, title, duration):
         id = data[0][0]
 
     # Asking the artist to provide the ids of all others artists who have performed the song with them.
-    artits_id = input("Please provide the ids of any additional artist who have performed this song separated by space: ")
+    artits_id = input(
+        "Please provide the ids of any additional artist who have performed this song separated by space: ")
     cur.execute("select * from songs")
     data = cur.fetchall()
     store = []
@@ -479,12 +537,12 @@ def add_song(id, title, duration):
 
     # for Each additional artists who performed the song, the perform tables get updated to reflect the same.
     for aid in artits_list:
-        cur.execute("select * from artists where lower(aid) = ?", (aid.lower(), ))
+        cur.execute("select * from artists where lower(aid) = ?", (aid.lower(),))
         data = cur.fetchall()
 
         # Checking if the artists exist in our database.
         if not data:
-            print("Artit "+ aid + " does not exists in the Database")
+            print("Artit " + aid + " does not exists in the Database")
         else:
             # To ensure that Iam only using the aid in the case format that it appears in my database.
             cur.execute("select * from artists where lower(aid)=?", (aid.lower(),))
@@ -502,29 +560,34 @@ def add_song(id, title, duration):
 
 def find_top_fans_and_playlist(artistId):
     # list top 3 users who listen to their songs the longest time
-    cur.execute("select uid from (Select l.uid, sum(s.duration*l.cnt) as time from songs s, listen l, perform p where s.sid = l.sid and s.sid = p.sid and p.aid in {} group by l.uid order by time desc limit 3)".format((artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
+    cur.execute(
+        "select uid from (Select l.uid, sum(s.duration*l.cnt) as time from songs s, listen l, perform p where s.sid = l.sid and s.sid = p.sid and p.aid in {} group by l.uid order by time desc limit 3)".format(
+            (artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
 
     # cur.execute("select uid from ( )".format(artistId))
     user = cur.fetchall()
     print("Top 3 Users ID who listen to your songs the longest time \n")
     for i in user:
         userid = i[0]
-        cur.execute("select uid, name from users where lower(uid) = ?",(userid.lower(),))
+        cur.execute("select uid, name from users where lower(uid) = ?", (userid.lower(),))
         output = cur.fetchall()
-        print(output[0][0] + " "+ output[0][1])
+        print(output[0][0] + " " + output[0][1])
 
     print("-".center(150, '-'))
 
     # list top 3 playlists that include the largest number of their songs.
-    cur.execute("select pid from (Select pid, count(sid) from plinclude where sid in (Select s.sid from songs s, perform p where s.sid = p.sid and p.aid in {}) group by pid order by count(sid) desc limit 3) ".format((artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
+    cur.execute(
+        "select pid from (Select pid, count(sid) from plinclude where sid in (Select s.sid from songs s, perform p where s.sid = p.sid and p.aid in {}) group by pid order by count(sid) desc limit 3) ".format(
+            (artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
     playlists = cur.fetchall()
     print("Top 3 Playlists ID that include the largest number of your songs. \n")
     for j in playlists:
         playlistid = str(j[0])
-        cur.execute("select pid, title from playlists where lower(pid) = ?",(playlistid.lower(),))
+        cur.execute("select pid, title from playlists where lower(pid) = ?", (playlistid.lower(),))
         output1 = cur.fetchall()
-        print(str(output1[0][0]) + " "+ output1[0][1])
+        print(str(output1[0][0]) + " " + output1[0][1])
     print("")
+
 
 def artist_session(id):
     """
@@ -543,7 +606,7 @@ def artist_session(id):
         user_option = input(str("Please enter an option #: "))
 
         # Ensuring that proper input is provided.
-        while(user_option not in ["1", "2", "3"]):
+        while (user_option not in ["1", "2", "3"]):
             clearTerminal()
             print(menu)
             user_option = input(str("Invalid option entered. Please enter an option #: "))
@@ -552,15 +615,18 @@ def artist_session(id):
         if user_option == "1":
             title = input("Please provide the title of the song: ")
             duration = input("Please provide the duration of the song (in seconds): ")
-            cur.execute("select * from perform, songs where perform.sid = songs.sid and lower(perform.aid) = ? and lower(title) = ? and duration = ?", (id.lower(), title.lower(), duration))
+            cur.execute(
+                "select * from perform, songs where perform.sid = songs.sid and lower(perform.aid) = ? and lower(title) = ? and duration = ?",
+                (id.lower(), title.lower(), duration))
             data = cur.fetchall()
-            
+
             # If the song does not exist already, adding to the table Otherwise a warning is generated.
             if not data:
                 # we can add a song
                 add_song(id, title, duration)
             else:
-                response = input("WARNING: Song exists\nPress 1. To reject the Song\nPress 2. To still add it as New Song ")
+                response = input(
+                    "WARNING: Song exists\nPress 1. To reject the Song\nPress 2. To still add it as New Song ")
                 if response == "1":
                     clearTerminal()
                 elif response == "2":
@@ -569,7 +635,7 @@ def artist_session(id):
                     print("Wrong input. Going back to MENU")
                 time.sleep(1.5)
                 clearTerminal()
-        
+
         # Allow the user to find the 
         elif user_option == "2":
             find_top_fans_and_playlist(id)
@@ -579,6 +645,7 @@ def artist_session(id):
 
 def clearTerminal():
     os.system('cls' if os.name == 'nt' else 'clear')  # Clear the system terminal to look cleaner
+
 
 def main():
     """
@@ -627,7 +694,7 @@ def main():
             while (user_option != "1" and user_option != "2"):
                 print("\r", end="")
                 user_option = input("Invalid option. Please enter either 1 for user or 2 for artist: ").strip()
-            
+
             userpass = getpass(
                 prompt=("Please enter your password (as a" + (" user): " if user_option == "1" else "n artist): ")))
             cur.execute("select {} from {} where {}=? and pwd=?".format(
@@ -639,7 +706,8 @@ def main():
             count = 0
             while (not data):
                 if (count >= 1):
-                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    response = input(
+                        "Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password. Please try again: ")
@@ -649,8 +717,8 @@ def main():
                     "uid" if user_option == "1" else "aid", "users" if user_option == "1" else "artists",
                     "lower(uid)" if user_option == "1" else "lower(aid)"), (id.lower(), userpass))
                 data = cur.fetchall()
-                count = count+1
-            
+                count = count + 1
+
             if response != "1":
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1.2)
@@ -668,13 +736,14 @@ def main():
             count = 0
             while (not data):
                 if (count >= 1):
-                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    response = input(
+                        "Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
                 cur.execute("select uid from users where lower(uid)=? and pwd=?", (id.lower(), userpass))
                 data = cur.fetchall()
-                count = count+1
+                count = count + 1
             else:
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1)
@@ -691,13 +760,14 @@ def main():
             count = 0
             while (not data):
                 if (count >= 1):
-                    response = input("Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
+                    response = input(
+                        "Incorrect Passowrd. Would you like to go back to the Log-in Terminal?\nPress 1. for YES Otherwise press any keyword for NO ")
                     if response == "1":
                         break
                 userpass = getpass(prompt="Incorrect password was provided. Please try again: ")
                 cur.execute("select aid from artists where lower(aid)=? and pwd=?", (id.lower(), userpass))
                 data = cur.fetchall()
-                count = count+1
+                count = count + 1
             else:
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1)
@@ -707,7 +777,8 @@ def main():
         # Invalid Id. Ask for Sign-up
         else:
             print("No valid user or artist ID found. Would you like to sign-up as a new user?")
-            user_option = input(str("Press 1 to continue!! \nPress anything else to go back to Log-in Terminal ")).strip()
+            user_option = input(
+                str("Press 1 to continue!! \nPress anything else to go back to Log-in Terminal ")).strip()
 
             if user_option == "1":
                 id = input("Please provide a user-id: ").strip()
@@ -729,4 +800,6 @@ def main():
                     print("This user-id already exists.")
                     time.sleep(1.2)
 
+
 main()
+

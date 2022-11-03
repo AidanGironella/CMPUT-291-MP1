@@ -132,6 +132,7 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
     songOrPlaylist: String of either 'Song' or 'Playlist' to tell it what kind of action to take
     Returns: none
     '''
+    uid = uid.lower()
     if songOrPlaylist == 'Playlist':  # User selected a playlist
         print("Songs in the playlist '{}':".format(selectionTitle))
         # Find all songs in the playlist

@@ -410,13 +410,16 @@ def search_song(UserInput, array, uid):
 
         # Asking User for to select a song & perform song action
         SongSelection = (input('Do you want to select any song - Enter it\'s song number: ').strip())
-        print()
-        print('Song Actions'.center(150, '-'))
+
         try:
             songs[int(SongSelection)]
         except ValueError:
             print('Incorrect Input!!')
+        except KeyError:
+            print('Sorry! There is no song having a song id: ' + str(SongSelection))
         else:
+            print()
+            print('Song Actions'.center(150, '-'))
             song_action(uid, int(SongSelection), songs[int(SongSelection)], 'Song')
 
 

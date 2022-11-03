@@ -175,21 +175,21 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                 if userInput in range(1,4):  # User entered a valid option
                     done = True
                     if userInput == 1:  # Listen to song
-                        cur.execute("SELECT sno from sessions where uid=? and end is null", (uid,))  # Check if user has an active session
+                        cur.execute("SELECT sno from sessions where lower(uid)=? and end is null", (uid,))  # Check if user has an active session
                         data = cur.fetchall()
                         if not data:  # No active session
                             print("Could not listen, you do not have an active session!\n")
                         else:
                             sessionNumber = data[0][0]  # This will throw an error if the user does not have an active sesssion
                             # See if we have already listened to this song in this session (if yes, increase cnt instead of inserting new entry)
-                            cur.execute("SELECT cnt from listen where uid=? and sno=? and sid=?", (uid,sessionNumber,selectionID,))
+                            cur.execute("SELECT cnt from listen where lower(uid)=? and sno=? and sid=?", (uid,sessionNumber,selectionID,))
                             data = cur.fetchall()
                             if not data:  # User has not listened to this song in this session - insert a new row
                                 cur.execute("INSERT INTO listen values (?, ?, ?, 1)", (uid, sessionNumber, selectionID,))
                                 conn.commit()
                             else:  # User has already listened to this song in this session - increase cnt
                                 existingCnt = data[0][0]  # Throws an error if this song is not already in this session
-                                cur.execute("UPDATE listen set cnt = cnt+1 where uid=? and sno=? and sid=?", (uid, sessionNumber, selectionID,))
+                                cur.execute("UPDATE listen set cnt = cnt+1 where lower(uid)=? and sno=? and sid=?", (uid, sessionNumber, selectionID,))
                                 conn.commit()
                             print("Now listening...\n")
                     elif userInput == 2:  # See more information
@@ -221,7 +221,7 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                     else:  # Add song to a playlist
                         addedToPlaylist = False  # Check if we are done adding the song to a playlist
                         while addedToPlaylist == False:
-                            cur.execute("SELECT * from playlists where uid=?", (uid,))  # Print all of the user's playlists
+                            cur.execute("SELECT * from playlists where lower(uid)=?", (uid,))  # Print all of the user's playlists
                             data = cur.fetchall()
                             print('0.\t Choose this option to create a new playlist')
                             i = 1

@@ -361,11 +361,11 @@ def search_song(UserInput, array, uid):
         songs = {}  # Dictionary to store the sid of the songs
         for i in artist_data:
             print(i)
-            songs[i[1]] = i[0]  # Keep track of this song's sid
+            songs[i[1].lower()] = i[0]  # Keep track of this song's sid
 
         print()
         SongSelection = input('Do you want to select any song - Enter it\'s name: ').strip()
-
+        print(songs)
         song_action(uid, songs[SongSelection], SongSelection, 'Song')
 
 def user_session(id):

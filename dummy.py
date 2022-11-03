@@ -336,9 +336,11 @@ def search_artists(uid):
         count = 0
         print('\n' + str('Found ' + str(len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
 
-        for k in result:
+        tempIds = []  # Temporary array for storing Artists Id
 
+        for k in result:
             print(k)  # Printing the data one by one & increasing the count by 1
+            tempIds.append(k[0])
             count += 1
 
             if count == len(result):  # Asking User what to do next if loop comes on the last record
@@ -350,7 +352,12 @@ def search_artists(uid):
                 if UserInput.lower() == 'n':
                     break
                 else:
-                    search_song(UserInput, result, uid)
+                    if UserInput not in tempIds:    # To ensure for incorrect Artist Id is taken care of
+                        print('Incorrect Artist Id!')
+                        break
+
+                    else:
+                        search_song(UserInput, result, uid)
 
             elif count % 5 == 0:  # If count is some multiple of 5
                 print()
@@ -366,8 +373,12 @@ def search_artists(uid):
                     break
 
                 else:
-                    search_song(UserInput, result, uid)  # Show all the songs of the artist which user has selected
-                    break
+                    if UserInput not in tempIds:    # To ensure for incorrect Artist Id is taken care of
+                        print('Incorrect Artist Id!')
+                        break
+                    else:
+                        search_song(UserInput, result, uid)  # Show all the songs of the artist which user has selected
+                        break
 
 
 def search_song(UserInput, array, uid):
@@ -805,5 +816,6 @@ def main():
                     time.sleep(1.2)
 
 main()
+
 
 

@@ -334,14 +334,15 @@ def search_artists(uid):
 
     else:
         count = 0
-        print(str('\n' + 'Found ' + str(
-            len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
+        print('\n' + str('Found ' + str(len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
 
         for k in result:
+
             print(k)  # Printing the data one by one & increasing the count by 1
             count += 1
 
             if count == len(result):  # Asking User what to do next if loop comes on the last record
+                print()
                 print('This is end of our search result.'.center(150, '-'))
                 UserInput = input('Do you want to terminate searching ' + str(
                     len(result) - count) + ' left (Press N) or Select the artist (type it\'snumber)? ').strip()
@@ -409,6 +410,8 @@ def search_song(UserInput, array, uid):
 
         # Asking User for to select a song & perform song action
         SongSelection = (input('Do you want to select any song - Enter it\'s song number: ').strip())
+        print()
+        print('Song Actions'.center(150, '-'))
         try:
             songs[int(SongSelection)]
         except ValueError:
@@ -797,7 +800,6 @@ def main():
                 else:
                     print("This user-id already exists.")
                     time.sleep(1.2)
-
 
 main()
 

@@ -13,7 +13,6 @@ cur = conn.cursor()
 def start_session(id):
     """
     This function is responsible for starting new session for the user.
-
     Parameters:
     id:The user id - uid
   
@@ -317,7 +316,7 @@ def search_artists(uid):
     else:
         count = 0
         print(str('\n' + 'Found ' + str(
-            len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
+            len(data)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
         for k in result:
             print(k)
 
@@ -372,7 +371,6 @@ def search_song(UserInput, array, uid):
 def user_session(id):
     """
     This function is responsible for creating user session where they can start/end a session, search songs, playlists and artists.
-
     Parameters:
     id:The user id - uid
   
@@ -437,7 +435,6 @@ def user_session(id):
 def add_song(id, title, duration):
     """
     This function is responsible for adding a new song to the songs table and update the perform table..
-
     Parameters:
     id:The user id - uid
     title: Song title
@@ -507,11 +504,14 @@ def find_top_fans_and_playlist(artistId):
     # list top 3 users who listen to their songs the longest time
     cur.execute("select uid from (Select l.uid, sum(s.duration*l.cnt) as time from songs s, listen l, perform p where s.sid = l.sid and s.sid = p.sid and p.aid in {} group by l.uid order by time desc limit 3)".format((artistId.lower(), artistId.upper(), artistId.capitalize(), artistId.title())))
 
-    cur.execute("select uid from ( )".format(artistId))
-    users = cur.fetchall()
+    # cur.execute("select uid from ( )".format(artistId))
+    user = cur.fetchall()
     print("Top 3 Users ID who listen to your songs the longest time \n")
-    for i in users:
-        print(i)
+    for i in user:
+        userid = i[0]
+        cur.execute("select uid, name from users where lower(uid) = ?",(userid.lower(),))
+        output = cur.fetchall()
+        print(output[0][0] + " "+ output[0][1])
 
     print("-".center(150, '-'))
 
@@ -520,12 +520,15 @@ def find_top_fans_and_playlist(artistId):
     playlists = cur.fetchall()
     print("Top 3 Playlists ID that include the largest number of your songs. \n")
     for j in playlists:
-        print(j)
+        playlistid = str(j[0])
+        cur.execute("select pid, title from playlists where lower(pid) = ?",(playlistid.lower(),))
+        output1 = cur.fetchall()
+        print(str(output1[0][0]) + " "+ output1[0][1])
+    print("")
 
 def artist_session(id):
     """
     This function is responsible for creating artist session where they can add a song and find their top fans and playlists.
-
     Parameters:
     id:The user id - uid
   
@@ -581,7 +584,6 @@ def main():
     """
     This is the main function of the program where the authentication happens. 
     From here, the access to user session or artist session is provided base on correct credentials.
-
     Parameters:
     None
   

@@ -397,11 +397,12 @@ def user_session(id):
 
         # Search songs and playlists from the database.
         elif user_option == "2":
-            search_songs_playlists()
+            clearTerminal()
+            search_songs_playlists(id)
 
         # Search different artists from the database 
         elif user_option == "3":
-            search_artists()
+            search_artists(id)
 
         # End the ongoing/current session of the user.
         elif user_option == "4":
@@ -673,7 +674,7 @@ def main():
                 count = count+1
             else:
                 print("Log-in Successful! Navigating to main screen...")
-                time.sleep(0)
+                time.sleep(1)
                 clearTerminal()
                 user_session(id)
 
@@ -696,7 +697,7 @@ def main():
                 count = count+1
             else:
                 print("Log-in Successful! Navigating to main screen...")
-                time.sleep(0)
+                time.sleep(1)
                 clearTerminal()
                 artist_session(id)
 

@@ -415,7 +415,6 @@ def search_song(UserInput, array, uid):
             print('Incorrect Input!!')
         else:
             song_action(uid, int(SongSelection), songs[int(SongSelection)], 'Song')
-        song_action(uid, songs[SongSelection], SongSelection, 'Song')
 
 
 

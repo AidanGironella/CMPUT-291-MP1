@@ -11,9 +11,17 @@ cur = conn.cursor()
 
 
 def start_session(id):
+    """
+    This function is responsible for starting new session for the user.
+
+    Parameters:
+    id:The user id - uid
+  
+    Returns:
+    sno: The unique session number - sno
+    """
 
     # Implemented Start a session. 
-    # Just made a change
     cur.execute("select * from sessions where lower(uid)=?", (id.lower(),))
     data = cur.fetchall()
     if not data:
@@ -247,6 +255,15 @@ def search_song(UserInput, array):
         song_action()
 
 def user_session(id):
+    """
+    This function is responsible for creating user session where they can start/end a session, search songs, playlists and artists.
+
+    Parameters:
+    id:The user id - uid
+  
+    Returns:
+    None
+    """
 
     # User Session with its menu
     menu = "User Session\n1. Start a session\n2. Search for songs and playlists\n3. Search for artists\n4. End the session\n5. Log out\n6. Exit the System"
@@ -302,6 +319,17 @@ def user_session(id):
 
 
 def add_song(id, title, duration):
+    """
+    This function is responsible for adding a new song to the songs table and update the perform table..
+
+    Parameters:
+    id:The user id - uid
+    title: Song title
+    duration: Song duration
+  
+    Returns:
+    None
+    """
 
     # Checking if the artists already exist in the database. If yes, we obtain their aid that exist in our system.
     cur.execute("select * from artists where lower(aid)=?", (id.lower(),))
@@ -378,6 +406,15 @@ def find_top_fans_and_playlist(artistId):
 
 
 def artist_session(id):
+    """
+    This function is responsible for creating artist session where they can add a song and find their top fans and playlists.
+
+    Parameters:
+    id:The user id - uid
+  
+    Returns:
+    None
+    """
     # "Artist Session" with the menu
     menu = "Artist Session\n1. Add a Song\n2. Find top 3 fans and Playlists\n3. Log out"
 
@@ -424,6 +461,16 @@ def clearTerminal():
 
 
 def main():
+    """
+    This is the main function of the program where the authentication happens. 
+    From here, the access to user session or artist session is provided base on correct credentials.
+
+    Parameters:
+    None
+  
+    Returns:
+    None
+    """
     while True:
         userfound = False
         artistfound = False

@@ -316,7 +316,7 @@ def search_artists(uid):
     else:
         count = 0
         print(str('\n' + 'Found ' + str(
-            len(data)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
+            len(result)) + ' matching results (No., Name, Nationality, Number of Songs)').center(150, '-'))
         for k in result:
             print(k)
 

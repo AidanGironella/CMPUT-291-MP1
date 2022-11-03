@@ -139,7 +139,7 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
         cur.execute('''
             SELECT s.sid, s.title, s.duration
             from playlists p, plinclude pl, songs s
-            where p.pid = ? and p.pid = pl.pid and pl.sid = s.sid
+            where p.pid = ? and p.pid = pl.pid and pl.sid = s.sid order by pl.sorder
             ''', (selectionID,))
         data = cur.fetchall()
         i = 1

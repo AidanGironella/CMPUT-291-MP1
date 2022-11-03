@@ -131,7 +131,6 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
     songOrPlaylist: String of either 'Song' or 'Playlist' to tell it what kind of action to take
     Returns: none
     '''
-    uid = uid.lower()
     if songOrPlaylist == 'Playlist':  # User selected a playlist
         print("Songs in the playlist '{}':".format(selectionTitle))
         # Find all songs in the playlist
@@ -175,21 +174,21 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                 if userInput in range(1,4):  # User entered a valid option
                     done = True
                     if userInput == 1:  # Listen to song
-                        cur.execute("SELECT sno from sessions where lower(uid)=? and end is null", (uid,))  # Check if user has an active session
+                        cur.execute("SELECT sno from sessions where lower(uid)=? and end is null", (uid.lower(),))  # Check if user has an active session
                         data = cur.fetchall()
                         if not data:  # No active session
                             print("Could not listen, you do not have an active session!\n")
                         else:
                             sessionNumber = data[0][0]  # This will throw an error if the user does not have an active sesssion
                             # See if we have already listened to this song in this session (if yes, increase cnt instead of inserting new entry)
-                            cur.execute("SELECT cnt from listen where lower(uid)=? and sno=? and sid=?", (uid,sessionNumber,selectionID,))
+                            cur.execute("SELECT cnt from listen where lower(uid)=? and sno=? and sid=?", (uid.lower(),sessionNumber,selectionID,))
                             data = cur.fetchall()
                             if not data:  # User has not listened to this song in this session - insert a new row
                                 cur.execute("INSERT INTO listen values (?, ?, ?, 1)", (uid, sessionNumber, selectionID,))
                                 conn.commit()
                             else:  # User has already listened to this song in this session - increase cnt
                                 existingCnt = data[0][0]  # Throws an error if this song is not already in this session
-                                cur.execute("UPDATE listen set cnt = cnt+1 where lower(uid)=? and sno=? and sid=?", (uid, sessionNumber, selectionID,))
+                                cur.execute("UPDATE listen set cnt = cnt+1 where lower(uid)=? and sno=? and sid=?", (uid.lower(), sessionNumber, selectionID,))
                                 conn.commit()
                             print("Now listening...\n")
                     elif userInput == 2:  # See more information
@@ -221,7 +220,7 @@ def song_action(uid, selectionID, selectionTitle, songOrPlaylist):
                     else:  # Add song to a playlist
                         addedToPlaylist = False  # Check if we are done adding the song to a playlist
                         while addedToPlaylist == False:
-                            cur.execute("SELECT * from playlists where lower(uid)=?", (uid,))  # Print all of the user's playlists
+                            cur.execute("SELECT * from playlists where lower(uid)=?", (uid.lower(),))  # Print all of the user's playlists
                             data = cur.fetchall()
                             print('0.\t Choose this option to create a new playlist')
                             i = 1
@@ -604,6 +603,8 @@ def main():
         else:
             userfound = True
             foundUserName = data[0][0]
+            cur.execute("select uid from users where lower(uid)=?", (id.lower(),))
+            actualUserID = cur.fetchall()[0][0]  # Set id as it appears in the table
 
         cur.execute("select name from artists where lower(aid)=?", (id.lower(),))
         data = cur.fetchall()
@@ -613,12 +614,14 @@ def main():
         else:
             artistfound = True
             foundArtistName = data[0][0]
+            cur.execute("select aid from artists where lower(aid)=?", (id.lower(),))
+            actualArtistID = cur.fetchall()[0][0]
 
         # If the ID exists in both users and artists
         if (artistfound == True and userfound == True):
             print("This ID exists for both a user and an artist")
-            print("Press 1 to log in as the user {}: {}".format(id, foundUserName))
-            print("Press 2 to log in as the artist {}: {}".format(id, foundArtistName))
+            print("Press 1 to log in as the user {}: {}".format(actualUserID, foundUserName))
+            print("Press 2 to log in as the artist {}: {}".format(actualArtistID, foundArtistName))
 
             user_option = 0
             user_option = input("\nPlease enter your option: ")
@@ -655,7 +658,7 @@ def main():
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1.2)
                 clearTerminal()
-                user_session(id) if user_option == "1" else artist_session(id)
+                user_session(actualUserID) if user_option == "1" else artist_session(actualArtistID)
 
 
         # If the id exists for only the user
@@ -679,7 +682,7 @@ def main():
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1)
                 clearTerminal()
-                user_session(id)
+                user_session(actualUserID)
 
         # If the id exists for only the artists
         elif (userfound == False and artistfound == True):
@@ -702,7 +705,7 @@ def main():
                 print("Log-in Successful! Navigating to main screen...")
                 time.sleep(1)
                 clearTerminal()
-                artist_session(id)
+                artist_session(actualArtistID)
 
         # Invalid Id. Ask for Sign-up
         else:
